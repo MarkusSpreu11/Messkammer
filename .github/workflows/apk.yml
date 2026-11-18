@@ -1,0 +1,32 @@
+name: Messkammer APK bauen
+on:
+  workflow_dispatch:
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Quellcode laden
+        uses: actions/checkout@v4
+      - name: ZIP entpacken
+        run: unzip -q Messkammer_Android_App*.zip
+      - name: Java 17 einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Gradle installieren
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Android SDK einrichten
+        uses: android-actions/setup-android@v3
+      - name: Android SDK 35 installieren
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Debug APK bauen
+        run: cd Messkammer_Android_App && gradle --no-daemon :app:assembleDebug
+      - name: APK bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: Messkammer-Bluetooth-APK
+          path: Messkammer_Android_App/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
